@@ -1,0 +1,28 @@
+{
+  "spot_name": "Cherry Grove Pier",
+  "latitude": 33.83,
+  "longitude": -78.62,
+  "timezone": "America/New_York",
+  "tide_station": "8661070",
+
+  "_offshore_note": "Direction the wind comes FROM that blows straight offshore. Cherry Grove faces about SE, so a NW wind (315) is offshore.",
+  "offshore_wind_from_deg": 315,
+
+  "rideable": {
+    "min_wave_ft": 1.5,
+    "min_period_s": 5,
+    "max_wind_mph": 20,
+    "max_onshore_wind_mph": 14
+  },
+
+  "alerts": {
+    "_note": "A day triggers an alert when it has at least this many daylight hours rated at or above min_rating (Fair, Good or Epic).",
+    "min_rating": "Fair",
+    "min_hours": 2,
+    "evening_hour_window": [17, 21],
+    "morning_hour_window": [4, 8]
+  },
+
+  "cam_page_url": "https://www.explorenorthmyrtlebeach.com/plan/web-cam/",
+  "backup_cam_url": "https://hdontap.com/stream/529804/boulineaus-cherry-grove-beach-live-cam"
+}

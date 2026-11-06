@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1d2a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Surf CG">
+<title>Cherry Grove Surf</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌊</text></svg>">
+<style>
+  :root {
+    --bg: #0b1d2a; --panel: #12293a; --panel-2: #183447; --line: #23465d;
+    --text: #e8f1f6; --muted: #8fb0c4;
+    --flat: #5a6b78; --poor: #b5564a; --fair: #d9a441; --good: #3fb67a; --epic: #36a3e0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 16px; }
+  header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  h1 { font-size: 1.35rem; margin: 0; }
+  .updated { color: var(--muted); font-size: .8rem; }
+  h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 24px 0 8px; }
+
+  .cam { display: flex; align-items: center; gap: 14px; padding: 18px 16px; border-radius: 12px; text-decoration: none;
+         color: var(--text); background: linear-gradient(135deg, #1b5d82, #12293a); }
+  .cam .play { flex: none; width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,.15);
+               display: grid; place-items: center; font-size: 1.2rem; }
+  .cam b { display: block; font-size: 1.05rem; }
+  .cam small { color: var(--muted); }
+  .cam-links { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 8px; font-size: .85rem; }
+  @media (max-width: 520px) { .col-swell { display: none; } }
+  a { color: #7cc8f2; }
+
+  .now { background: var(--panel); border-radius: 12px; padding: 14px 16px; display: grid; gap: 4px; }
+  .now .big { font-size: 1.15rem; font-weight: 600; }
+  .now .sub { color: var(--muted); font-size: .9rem; }
+
+  .day { background: var(--panel); border-radius: 12px; margin-bottom: 8px; overflow: hidden; }
+  .day summary { list-style: none; cursor: pointer; padding: 12px 14px; display: grid;
+                 grid-template-columns: 86px 1fr auto; gap: 4px 12px; align-items: center; }
+  .day summary::-webkit-details-marker { display: none; }
+  .day .date { font-weight: 600; }
+  .day .desc { color: var(--muted); font-size: .85rem; grid-column: 1 / -1; }
+  .day .win { font-size: .9rem; }
+  .badge { font-size: .75rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; color: #08131b; white-space: nowrap; }
+  .r-Flat { background: var(--flat); color: var(--text); } .r-Poor { background: var(--poor); color: var(--text); }
+  .r-Fair { background: var(--fair); } .r-Good { background: var(--good); } .r-Epic { background: var(--epic); }
+  .alert-dot { color: var(--good); font-size: .75rem; font-weight: 600; }
+
+  .detail { border-top: 1px solid var(--line); padding: 12px 14px 14px; background: var(--panel-2); }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: .85rem; color: var(--muted); margin-bottom: 12px; }
+  .meta b { color: var(--text); font-weight: 600; }
+  .bars { display: flex; align-items: flex-end; gap: 3px; height: 90px; }
+  .bar { flex: 1; border-radius: 3px 3px 0 0; min-height: 3px; position: relative; }
+  .bar span { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: .65rem; color: var(--muted); }
+  .hours { display: flex; gap: 3px; margin-top: 4px; }
+  .hours div { flex: 1; text-align: center; font-size: .62rem; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: .8rem; margin-top: 12px; }
+  th, td { text-align: left; padding: 5px 4px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { color: var(--muted); font-weight: 500; }
+  .table-wrap { overflow-x: auto; }
+  .err { background: var(--poor); padding: 12px; border-radius: 12px; }
+  footer { color: var(--muted); font-size: .75rem; margin: 24px 0 8px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>🌊 Cherry Grove</h1>
+    <span class="updated" id="updated"></span>
+  </header>
+
+  <a class="cam" id="cam-page" target="_blank" rel="noopener">
+    <span class="play">▶</span>
+    <span><b>Watch the live pier cam</b><small>Top of Cherry Grove Pier · you can pan and zoom</small></span>
+  </a>
+  <div class="cam-links">
+    <a id="backup-cam" target="_blank" rel="noopener">Backup: Cherry Grove beach cam (HDOnTap)</a>
+  </div>
+
+  <h2>Right now</h2>
+  <div class="now" id="now">Loading forecast…</div>
+
+  <h2>7-day outlook</h2>
+  <div id="days"></div>
+
+  <footer>
+    Waves &amp; wind: Open-Meteo. Tides: NOAA (Springmaid Pier). Cam: explorenorthmyrtlebeach.com (it only plays on their site, so it opens there).
+    A dot means the day would trigger an alert.
+  </footer>
+</main>
+
+<script>
+const colors = { Flat: "var(--flat)", Poor: "var(--poor)", Fair: "var(--fair)", Good: "var(--good)", Epic: "var(--epic)" };
+const hr = h => (h % 12 || 12) + (h < 12 ? "a" : "p");
+const t12 = s => { if (!s) return ""; let [h, m] = s.split(":").map(Number); return (h % 12 || 12) + ":" + String(m).padStart(2, "0") + (h < 12 ? "am" : "pm"); };
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+fetch("data.json?" + Date.now())
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(render)
+  .catch(e => { document.getElementById("now").outerHTML = `<div class="err">Couldn't load the forecast (${esc(e.message)}). It updates every few hours.</div>`; });
+
+function render(data) {
+  document.getElementById("cam-page").href = data.cam_page_url;
+  document.getElementById("backup-cam").href = data.backup_cam_url;
+
+  const gen = new Date(data.generated_at);
+  document.getElementById("updated").textContent = "Updated " + gen.toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" });
+
+  // "Right now" = the forecast hour closest to the current time today, or the next day with data
+  const nowH = new Date().getHours();
+  const todayISO = new Date().toLocaleDateString("en-CA");
+  const today = data.days.find(d => d.date === todayISO) || data.days[0];
+  const cur = today.hours.reduce((a, h) => Math.abs(h.hour - nowH) < Math.abs(a.hour - nowH) ? h : a, today.hours[0]);
+  document.getElementById("now").innerHTML = `
+    <div class="big"><span class="badge r-${cur.rating}">${cur.rating}</span>
+      ${cur.wave_ft.toFixed(1)} ft @ ${Math.round(cur.period_s)}s ${esc(cur.wave_dir)}</div>
+    <div class="sub">Wind ${Math.round(cur.wind_mph)} mph ${esc(cur.wind_dir)} (${esc(cur.wind_type.toLowerCase())}),
+      gusts ${Math.round(cur.gust_mph)} · Air ${Math.round(cur.air_f)}°F · Water ${cur.water_f ?? "?"}°F</div>
+    <div class="sub">Tides: ${today.tides.map(t => `${t.type} ${t.time}`).join(" · ") || "n/a"}</div>`;
+
+  const maxWave = Math.max(3, ...data.days.flatMap(d => d.hours.map(h => h.wave_ft || 0)));
+  document.getElementById("days").innerHTML = data.days.map((d, i) => `
+    <details class="day" ${i === 0 ? "open" : ""}>
+      <summary>
+        <span class="date">${esc(d.label)}</span>
+        <span class="win">${d.window ? "Best " + esc(d.window) : "No good window"}
+          ${d.qualifies ? '<span class="alert-dot" title="Would trigger an alert">● alert</span>' : ""}</span>
+        <span class="badge r-${d.rating}">${d.rating}</span>
+        <span class="desc">${esc(d.summary)}</span>
+      </summary>
+      <div class="detail">
+        <div class="meta">
+          <span>Sunrise <b>${t12(d.sunrise)}</b></span><span>Sunset <b>${t12(d.sunset)}</b></span>
+          <span>Tides <b>${d.tides.map(t => `${t.type[0]} ${t.time}`).join(", ") || "n/a"}</b></span>
+        </div>
+        <div class="bars">${d.hours.map(h => `<div class="bar" style="height:${Math.max(4, (h.wave_ft || 0) / maxWave * 100)}%;background:${colors[h.rating]}" title="${hr(h.hour)}: ${h.rating}, ${h.reason}"><span>${(h.wave_ft || 0).toFixed(1)}</span></div>`).join("")}</div>
+        <div class="hours">${d.hours.map(h => `<div>${hr(h.hour)}</div>`).join("")}</div>
+        <div class="table-wrap"><table>
+          <tr><th>Time</th><th>Surf</th><th class="col-swell">Swell</th><th>Wind</th><th>Rating</th></tr>
+          ${d.hours.map(h => `<tr>
+            <td>${hr(h.hour)}</td>
+            <td>${(h.wave_ft || 0).toFixed(1)}ft ${Math.round(h.period_s)}s ${esc(h.wave_dir)}</td>
+            <td class="col-swell">${(h.swell_ft || 0).toFixed(1)}ft ${Math.round(h.swell_period_s || 0)}s ${esc(h.swell_dir)}</td>
+            <td>${Math.round(h.wind_mph)} ${esc(h.wind_dir)} <small>${esc(h.wind_type)}</small></td>
+            <td><span class="badge r-${h.rating}">${h.rating}</span></td></tr>`).join("")}
+        </table></div>
+      </div>
+    </details>`).join("");
+}
+</script>
+</body>
+</html>

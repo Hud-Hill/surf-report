@@ -1,0 +1,54 @@
+name: Surf check
+
+on:
+  schedule:
+    # GitHub cron uses UTC and can run 5-30 min late; surf.py decides what to do from local time.
+    - cron: "30 22 * * *"   # evening: 5:30pm EST / 6:30pm EDT -> alert about tomorrow
+    - cron: "0 11 * * *"    # morning: 6:00am EST / 7:00am EDT -> alert about today (or "called off")
+    - cron: "0 14,17,20,2 * * *"  # dashboard refreshes during the day
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "auto, evening, morning or none"
+        default: auto
+      test_notify:
+        description: "Send a test notification only"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: surf-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run surf check
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          DASHBOARD_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+        run: |
+          if [ "${{ inputs.test_notify }}" = "true" ]; then
+            python surf.py --test-notify
+          else
+            python surf.py --mode "${{ inputs.mode || 'auto' }}"
+          fi
+
+      - name: Save forecast for the dashboard
+        if: ${{ inputs.test_notify != true }}
+        run: |
+          git config user.name "surf-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data.json
+          git diff --cached --quiet || git commit -m "Update forecast $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push
