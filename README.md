@@ -1,5 +1,7 @@
 # Cherry Grove Surf
 
+**Dashboard:** https://hud-hill.github.io/surf-report/
+
 A free, personal replacement for a Surfline subscription:
 
 - **Push alerts** on your phone (via the free [ntfy](https://ntfy.sh) app):
@@ -25,7 +27,7 @@ Data sources (all free, no API keys): Open-Meteo marine and wind forecasts, and 
 4. In the repo on GitHub:
    - **Settings → Secrets and variables → Actions → New repository secret:** name `NTFY_TOPIC`, value = your topic name.
    - **Settings → Pages:** Source = *Deploy from a branch*, Branch = `main`, folder = `/docs`. Save.
-   - **Settings → Actions → General → Workflow permissions:** select *Read and write permissions*.
+   - (The workflow grants itself write access to save the forecast, so the repo-wide workflow permissions can stay read-only.)
 5. **Test it:** **Actions → Surf check → Run workflow**, tick *Send a test notification only*. Your phone should buzz within seconds. Run it again without the box ticked to build the first forecast.
 6. Open `https://<your-username>.github.io/surf-report/` on your phone and **Share → Add to Home Screen**.
 
